@@ -1,5 +1,5 @@
 
-# 🧠 Medical QA Bot using FAISS + Sentence Transformers
+#Medical QA Bot using FAISS + Sentence Transformers
 
 This project builds a question-answering bot using a custom medical dataset (MedQuAD), FAISS for similarity search, and Sentence Transformers for semantic embeddings. The goal is to allow users to ask common medical questions and receive accurate, relevant answers from a curated set of FAQs.
 
