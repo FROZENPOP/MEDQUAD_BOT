@@ -45,7 +45,8 @@ if "messages" not in st.session_state:
 with st.sidebar:
     st.header("Settings")
     temperature = st.slider("Response Temperature", 0.0, 1.0, 0.3, 0.05)
-    max_tokens = st.slider("Max response length (tokens)", 50, 2000, 512, 50)
+    # The model's reasoning counts towards this limit, so low values cut answers short.
+    max_tokens = st.slider("Max response length (tokens)", 100, 4000, 2000, 50)
     response_style = st.radio("Response Style", ["Detailed", "General"], index=0)
     top_k = st.slider("Number of relevant entries to retrieve (Top K)", min_value=1, max_value=10, value=3)
     show_source = st.checkbox("Show source context with answers", value=False)
@@ -117,8 +118,12 @@ If the message describes a possible medical emergency, tell the user to contact 
         st.error(f"Groq request failed: {e}")
         st.stop()
 
-    # Reasoning models spend tokens before answering, so a low limit can leave no text.
-    reply = response.choices[0].message.content or "The model returned no text. Try raising the max response length."
+    choice = response.choices[0]
+    reply = choice.message.content or ""
+    # A medical answer that stops mid-sentence must not look complete.
+    if choice.finish_reason == "length":
+        reply += "\n\n*This answer was cut off by the response length limit. Raise the limit in the sidebar and ask again.*"
+    reply = reply or "The model returned no text. Please try again."
 
     assistant_message = {"role": "assistant", "content": reply, "source": contexts}
     st.session_state.messages.append(assistant_message)
